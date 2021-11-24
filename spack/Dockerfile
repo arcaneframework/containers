@@ -15,8 +15,6 @@ RUN mkdir -p /spack /recipes /home/user && useradd spack && chown -R user: /spac
 
 USER user
 
-RUN ls -l /home/
-
 SHELL ["/bin/bash", "-c"]
 
 # Download last release of spack and configure it to use buildcache

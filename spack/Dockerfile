@@ -33,21 +33,28 @@ COPY --chown=user:user e4s-config-packages.yaml /spack/etc/spack/packages.yaml
 # Get arcane recipes
 RUN curl -L https://github.com/arcaneframework/spack_recipes/archive/refs/heads/${RECIPES_BRANCH}.tar.gz | tar xz -C /recipes --strip-components 1
 
+COPY --chown=user:user envs /tmp/envs
+
+RUN ls -l /tmp/*
+
 # setup our recipes
 RUN source /spack/share/spack/setup-env.sh && \
     spack repo add --scope site /recipes
 
 # Define and compile an alien environment
 RUN source /spack/share/spack/setup-env.sh && \
-    spack env activate -d /recipes/envs/alien && \
+    spack env create alien /tmp/envs/alien/spack.yaml && \
+    spack env activate alien && \
     spack concretize -f && spack install --fail-fast
 
 # Define and compile an arcane environment
 RUN source /spack/share/spack/setup-env.sh && \
-    spack env activate -d /recipes/envs/arcane && \
+    spack env create arcane /tmp/envs/arcane/spack.yaml && \
+    spack env activate arcane && \
     spack concretize -f && spack install --fail-fast
 
 # Define and compile an arcane and alien environment
 RUN source /spack/share/spack/setup-env.sh && \
-    spack env activate -d /recipes/envs/all && \
+    spack env create arcane_alien /tmp/envs/all/spack.yaml && \
+    spack env activate arcane_alien && \
     spack concretize -f && spack install --fail-fast

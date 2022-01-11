@@ -55,4 +55,4 @@ RUN source /spack/share/spack/setup-env.sh && \
     spack env activate arcane_alien && \
     spack concretize -f && spack install --fail-fast
 
-RUN rm -rf /tmp/*
+RUN rm -rf /tmp/* || true

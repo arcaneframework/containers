@@ -24,14 +24,14 @@ RUN curl -L https://github.com/spack/spack/releases/download/v${SPACK_VERSION}/s
     spack buildcache keys -it
 
 # Load e4s spack config to optimize buildcache use
-COPY --chown=user:user e4s-config-packages.yaml /spack/etc/spack/packages.yaml
+COPY --chown=user e4s-config-packages.yaml /spack/etc/spack/packages.yaml
 
 # RUN spack config --scope site add packages:all:providers:mpi:[openmpi]
 
 # Get arcane recipes
 RUN curl -L https://github.com/arcaneframework/spack_recipes/archive/refs/heads/${RECIPES_BRANCH}.tar.gz | tar xz -C /recipes --strip-components 1
 
-COPY --chown=user:user envs /tmp/envs
+COPY --chown=user envs /tmp/envs
 
 # setup our recipes
 RUN source /spack/share/spack/setup-env.sh && \

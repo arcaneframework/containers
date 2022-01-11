@@ -17,4 +17,3 @@ IMAGE_VERSION:= $(shell date '+%Y-%m-%d')
 
 build: Dockerfile Makefile
 	${DOCKER_CMD} build --format=docker --build-arg UID=${UID} --build-arg GID=${GID} --build-arg BASEIMAGE=${BASEIMAGE} --build-arg RECIPES_BRANCH=${RECIPES_BRANCH} --build-arg SPACK_VERSION=${SPACK_VERSION} -t ${REPO}/${IMAGE_NAME}:${IMAGE_VERSION} -t ${REPO}/${IMAGE_NAME}:latest .
-

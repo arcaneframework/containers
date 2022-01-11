@@ -2,7 +2,7 @@ ARG BASEIMAGE=ecpe4s/rhel8-runner-x86_64
 
 FROM $BASEIMAGE
 
-ARG SPACK_VERSION=0.17.0
+ARG SPACK_VERSION=0.17.1
 ARG RECIPES_BRANCH=main
 
 ARG UID=1000
@@ -33,8 +33,6 @@ RUN curl -L https://github.com/arcaneframework/spack_recipes/archive/refs/heads/
 
 COPY --chown=user envs /tmp/envs
 
-RUN ls -l /tmp/*
-
 # setup our recipes
 RUN source /spack/share/spack/setup-env.sh && \
     spack repo add --scope site /recipes
@@ -56,3 +54,5 @@ RUN source /spack/share/spack/setup-env.sh && \
     spack env create arcane_alien /tmp/envs/all/spack.yaml && \
     spack env activate arcane_alien && \
     spack concretize -f && spack install --fail-fast
+
+RUN rm -rf /tmp/*

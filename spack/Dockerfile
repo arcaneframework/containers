@@ -17,16 +17,9 @@ USER user
 
 SHELL ["/bin/bash", "-c"]
 
-# Download last release of spack and configure it to use buildcache
+# Download last release of spack
 RUN curl -L https://github.com/spack/spack/releases/download/v${SPACK_VERSION}/spack-${SPACK_VERSION}.tar.gz | tar xz -C /spack --strip-components=1 && \
-    source /spack/share/spack/setup-env.sh && \
-    spack mirror add --scope site E4S https://cache.e4s.io && \
-    spack buildcache keys -it
-
-# Load e4s spack config to optimize buildcache use
-COPY --chown=user e4s-config-packages.yaml /spack/etc/spack/packages.yaml
-
-# RUN spack config --scope site add packages:all:providers:mpi:[openmpi]
+    source /spack/share/spack/setup-env.sh
 
 # Get arcane recipes
 RUN curl -L https://github.com/arcaneframework/spack_recipes/archive/refs/heads/${RECIPES_BRANCH}.tar.gz | tar xz -C /recipes --strip-components 1

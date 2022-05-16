@@ -26,6 +26,12 @@ RUN curl -L https://github.com/arcaneframework/spack_recipes/archive/refs/heads/
 
 COPY --chown=user envs /tmp/envs
 
+# Define and compile dev-tools environment
+RUN source /spack/share/spack/setup-env.sh && \
+    spack env create dev-tools /tmp/envs/dev-tools/spack.yaml && \
+    spack env activate dev-tools && \
+    spack concretize -f && spack install --fail-fast
+
 # setup our recipes
 RUN source /spack/share/spack/setup-env.sh && \
     spack repo add --scope site /recipes

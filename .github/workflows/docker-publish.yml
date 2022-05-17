@@ -36,12 +36,12 @@ jobs:
           - {
             name: "arcane-spack-ubuntu20.04",
             base_image: "ecpe4s/ubuntu20.04-runner-x86_64",
-            spack_version: "0.17.1",
+            spack_version: "0.17.2",
           }
           - {
             name: "arcane-spack-rhel8",
             base_image: "ecpe4s/rhel8-runner-x86_64",
-            spack_version: "0.17.1",
+            spack_version: "0.17.2",
           }
 
     steps:

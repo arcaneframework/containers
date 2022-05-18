@@ -7,7 +7,7 @@ BASEIMAGE=ecpe4s/rhel8-runner-x86_64
 IMAGE_NAME=spack-rhel8
 REPO=ghcr.io/arcaneframework
 RECIPES_BRANCH=main
-SPACK_VERSION=0.17.1
+SPACK_VERSION=0.17.2
 
 IMAGE_VERSION:= $(shell date '+%Y-%m-%d')
 

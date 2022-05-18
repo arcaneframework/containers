@@ -19,7 +19,8 @@ SHELL ["/bin/bash", "-c"]
 
 # Download last release of spack
 RUN curl -L https://github.com/spack/spack/releases/download/v${SPACK_VERSION}/spack-${SPACK_VERSION}.tar.gz | tar xz -C /spack --strip-components=1 && \
-    source /spack/share/spack/setup-env.sh
+    source /spack/share/spack/setup-env.sh && \
+    spack config --scope site add 'packages:all:target:[x86_64]'
 
 # Get arcane recipes
 RUN curl -L https://github.com/arcaneframework/spack_recipes/archive/refs/heads/${RECIPES_BRANCH}.tar.gz | tar xz -C /recipes --strip-components 1

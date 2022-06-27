@@ -40,7 +40,7 @@ jobs:
           }
           - {
             name: "arcane-spack-ubuntu22.04",
-            base_image: "ecpe4s/ubuntu22.04-runner-x86_64:2022-07-01",
+            base_image: "ecpe4s/ubuntu22.04-runner-x86_64",
             spack_version: "0.18.0",
           }
           - {

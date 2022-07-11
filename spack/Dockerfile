@@ -25,34 +25,30 @@ RUN curl -L https://github.com/spack/spack/releases/download/v${SPACK_VERSION}/s
 # Get arcane recipes
 RUN curl -L https://github.com/arcaneframework/spack_recipes/archive/refs/heads/${RECIPES_BRANCH}.tar.gz | tar xz -C /recipes --strip-components 1
 
-COPY --chown=user envs /tmp/envs
-
-# Define and compile dev-tools environment
-RUN source /spack/share/spack/setup-env.sh && \
-    spack env create dev-tools /tmp/envs/dev-tools/spack.yaml && \
-    spack env activate dev-tools && \
-    spack concretize -f && spack install --fail-fast
-
 # setup our recipes
 RUN source /spack/share/spack/setup-env.sh && \
     spack repo add --scope site /recipes
 
 # Define and compile an alien environment
 RUN source /spack/share/spack/setup-env.sh && \
-    spack env create alien /tmp/envs/alien/spack.yaml && \
+    spack env create alien --without-view && \
     spack env activate alien && \
+    spack add alien +hypre+petsc+xml+hdf5+move+ref ginkgo=omp trilinos=omp && \
     spack concretize -f && spack install --fail-fast
 
 # Define and compile an arcane environment
 RUN source /spack/share/spack/setup-env.sh && \
-    spack env create arcane /tmp/envs/arcane/spack.yaml && \
+    spack env create arcane --without-view && \
     spack env activate arcane && \
+    spack add arcane ~wrapper~monoembed && \
     spack concretize -f && spack install --fail-fast
 
 # Define and compile an arcane and alien environment
 RUN source /spack/share/spack/setup-env.sh && \
-    spack env create arcane_alien /tmp/envs/all/spack.yaml && \
+    spack env create arcane_alien --without-view && \
     spack env activate arcane_alien && \
+    spack add alien +hypre+petsc+xml+hdf5+move+ref ginkgo=omp trilinos=omp && \
+    spack add arcane ~wrapper~monoembed && \
     spack concretize -f && spack install --fail-fast
 
 RUN rm -rf /tmp/* || true

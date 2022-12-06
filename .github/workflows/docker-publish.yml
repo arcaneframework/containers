@@ -34,18 +34,18 @@ jobs:
       matrix:
         config:
           - {
-            name: "arcane-spack-ubuntu20.04",
-            base_image: "ecpe4s/ubuntu20.04-runner-x86_64",
+            name: "alien-spack-ubuntu20.04",
+            base_image: "ubuntu:20.04",
             spack_version: "0.19.0",
           }
           - {
-            name: "arcane-spack-ubuntu22.04",
-            base_image: "ecpe4s/ubuntu22.04-runner-x86_64",
+            name: "alien-spack-ubuntu22.04",
+            base_image: "ubuntu:22.04",
             spack_version: "0.19.0",
           }
           - {
-            name: "arcane-spack-rhel8",
-            base_image: "ecpe4s/rhel8-runner-x86_64",
+            name: "alien-spack-alma8",
+            base_image: "almalinux:8",
             spack_version: "0.19.0",
           }
 

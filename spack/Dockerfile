@@ -34,12 +34,24 @@ RUN curl -L https://github.com/arcaneframework/spack_recipes/archive/refs/heads/
 RUN source /spack/share/spack/setup-env.sh && \
     spack repo add --scope site /recipes
 
+ADD buildcache /home/user/buildcache
+
+
+RUN source /spack/share/spack/setup-env.sh && \
+    spack mirror add cache /home/user/buildcache && \
+    spack buildcache update-index -d /home/user/buildcache
+
 # Define and compile an alien environment
 RUN source /spack/share/spack/setup-env.sh && \
     spack env create alien --without-view && \
     spack env activate alien && \
     spack add alien +hypre+petsc+xml+hdf5+move+ref ginkgo=omp trilinos=omp && \
     spack concretize -f && spack install --fail-fast
+
+RUN source /spack/share/spack/setup-env.sh && \
+    spack env create alien --without-view && \
+    spack env activate alien && \
+    spack buildcache create -a -d /home/user/bcache
 
 # # Define and compile an arcane environment
 # RUN source /spack/share/spack/setup-env.sh && \

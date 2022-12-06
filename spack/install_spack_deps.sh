@@ -12,7 +12,7 @@ install_dnf()
 {
     dnf -y update
     dnf -y group install "Development Tools"
-    dnf -y install curl gnupg2 python3 python3-pip python3-setuptools
+    dnf -y install curl gnupg2 python3 python3-pip python3-setuptools gcc-gfortran
     dnf -y install bash
     dnf clean all
 }

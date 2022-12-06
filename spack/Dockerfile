@@ -56,4 +56,7 @@ RUN source /spack/share/spack/setup-env.sh && \
 #     spack add arcane ~wrapper~monoembed && \
 #     spack concretize -f && spack install --fail-fast
 
+RUN source /spack/share/spack/setup-env.sh && \
+    spack clean -a
+
 RUN rm -rf /tmp/* || true

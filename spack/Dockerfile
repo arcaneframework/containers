@@ -48,8 +48,17 @@ RUN source /spack/share/spack/setup-env.sh && \
     spack add alien +hypre+petsc+xml+hdf5+move+ref ginkgo=omp trilinos=omp && \
     spack concretize -f && spack install --fail-fast
 
+USER root
+
+RUN DEBIAN_FRONTEND=noninteractive apt update && DEBIAN_FRONTEND=noninteractive apt -y install file
+
+USER user
+
+ADD import_signing_key.sh /tmp
+
+RUN --mount=type=secret,id=signingkey,uid=$UID /tmp/import_signing_key.sh /run/secrets/signingkey
+
 RUN source /spack/share/spack/setup-env.sh && \
-    spack env create alien --without-view && \
     spack env activate alien && \
     spack buildcache create -a -d /home/user/bcache
 
@@ -71,4 +80,5 @@ RUN source /spack/share/spack/setup-env.sh && \
 RUN source /spack/share/spack/setup-env.sh && \
     spack clean -a
 
+USER root
 RUN rm -rf /tmp/* || true

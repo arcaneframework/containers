@@ -1,4 +1,5 @@
-ARG BASEIMAGE=ecpe4s/rhel8-runner-x86_64
+# syntax=docker/dockerfile:1
+ARG BASEIMAGE=ubuntu:22.04
 
 FROM $BASEIMAGE
 
@@ -15,7 +16,8 @@ RUN mkdir -p /spack /recipes /home/user && useradd spack && chown -R user: /spac
 
 ADD install_spack_deps.sh /tmp/
 
-RUN bash /tmp/install_spack_deps.sh
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+  --mount=type=cache,target=/var/lib/apt,sharing=locked bash /tmp/install_spack_deps.sh
 
 USER user
 
@@ -34,33 +36,24 @@ RUN curl -L https://github.com/arcaneframework/spack_recipes/archive/refs/heads/
 RUN source /spack/share/spack/setup-env.sh && \
     spack repo add --scope site /recipes
 
-ADD buildcache /home/user/buildcache
+ADD import_signing_key.sh /tmp
 
+RUN --mount=type=secret,id=signingkey,uid=1000 /tmp/import_signing_key.sh /run/secrets/signingkey
 
-RUN source /spack/share/spack/setup-env.sh && \
+RUN --mount=type=cache,target=/home/user/buildcache,source=buildcache source /spack/share/spack/setup-env.sh && \
     spack mirror add cache /home/user/buildcache && \
     spack buildcache update-index -d /home/user/buildcache
 
 # Define and compile an alien environment
-RUN source /spack/share/spack/setup-env.sh && \
+RUN --mount=type=cache,target=/home/user/buildcache,source=buildcache source /spack/share/spack/setup-env.sh && \
     spack env create alien --without-view && \
     spack env activate alien && \
     spack add alien +hypre+petsc+xml+hdf5+move+ref ginkgo=omp trilinos=omp && \
     spack concretize -f && spack install --fail-fast
 
-USER root
-
-RUN DEBIAN_FRONTEND=noninteractive apt update && DEBIAN_FRONTEND=noninteractive apt -y install file
-
-USER user
-
-ADD import_signing_key.sh /tmp
-
-RUN --mount=type=secret,id=signingkey,uid=$UID /tmp/import_signing_key.sh /run/secrets/signingkey
-
-RUN source /spack/share/spack/setup-env.sh && \
+RUN --mount=type=cache,target=/home/user/outcache,source=outcache source /spack/share/spack/setup-env.sh && \
     spack env activate alien && \
-    spack buildcache create -a -d /home/user/bcache
+    spack buildcache create -a -d /home/user/outcache
 
 # # Define and compile an arcane environment
 # RUN source /spack/share/spack/setup-env.sh && \

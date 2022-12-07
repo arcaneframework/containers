@@ -42,19 +42,19 @@ RUN --mount=type=cache,target=/buildcache source /spack/share/spack/setup-env.sh
 RUN  --mount=type=cache,target=/buildcache source /spack/share/spack/setup-env.sh && \
     spack env create tools --without-view && \
     spack env activate tools && \
-    spack add cmake autotools && \
-    spack concretize -f && spack install --fail-fast && \
-    spack buildcache create -a -m cache && \
-    spack uninstall --all
+    spack add cmake meson m4 pkgconf autoconf automake libtool && \
+    spack concretize -f && (spack install --fail-fast ; \
+    spack buildcache create -a -m cache) && \
+    spack uninstall -y --all
 
 # Define and compile an alien environment
 RUN --mount=type=cache,target=/buildcache source /spack/share/spack/setup-env.sh && \
     spack buildcache update-index -d /buildcache && \
     spack env create alien --without-view && \
     spack env activate alien && \
-    spack add alien +hypre+petsc+xml+hdf5+move+ref ginkgo=omp trilinos=omp && \
-    spack concretize -f && spack install --fail-fast && \
-    spack buildcache create -a -m cache
+    spack add alien +hypre+petsc+xml+hdf5+move+ref ginkgo=omp trilinos=omp ^trilinos~explicit_template_instantiation && \
+    spack concretize -f && (spack install --fail-fast; \
+    spack buildcache create -a -m cache)
 
 # # Define and compile an arcane environment
 # RUN source /spack/share/spack/setup-env.sh && \
@@ -73,6 +73,13 @@ RUN --mount=type=cache,target=/buildcache source /spack/share/spack/setup-env.sh
 
 # RUN source /spack/share/spack/setup-env.sh && \
 #     spack clean -a
+
+# Strip all the binaries
+RUN find -L /spack/opt/* -type f -exec readlink -f '{}' \; | \
+    xargs file -i | \
+    grep 'charset=binary' | \
+    grep 'x-executable\|x-archive\|x-sharedlib' | \
+    awk -F: '{print $1}' | xargs strip -s
 
 FROM base AS final
 COPY --from=builder /spack/opt/ /spack/

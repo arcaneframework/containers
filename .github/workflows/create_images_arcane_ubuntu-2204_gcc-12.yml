@@ -1,0 +1,91 @@
+name: '[ARC_U22:G12] Image Creator'
+
+on:
+  # A executer que lorsque l'on demande.
+  workflow_dispatch:
+    inputs:
+      os_base:
+        description: 'OS Base'
+        required: true
+        default: 'ubuntu-2204'
+        type: choice
+        options:
+        - 'ubuntu-2204'
+
+      compiler:
+        description: 'Compiler'
+        required: true
+        default: 'gcc-12'
+        type: choice
+        options:
+        - 'gcc-12'
+
+      dependencies:
+        description: 'Dependencies'
+        required: true
+        default: 'full'
+        type: choice
+        options:
+        - 'full'
+        - 'minimal'
+
+      type_build:
+        description: 'Type Build'
+        required: true
+        default: 'release'
+        type: choice
+        options:
+        - 'release'
+        - 'debug'
+        - 'check'
+
+
+env:
+  REGISTRY: 'ghcr.io'
+  USER_NAME: 'arcaneframework'
+  DOCKERFILE_PATH: './without_spack/dockerfiles'
+
+jobs:
+  build-and-push:
+    name: Build and Push
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Verif minimal check
+        if: ${{ inputs.os_base == 'ubuntu-2204' && inputs.compiler == 'gcc-12' && inputs.dependencies == 'minimal' && inputs.type_build == 'check'}}
+        shell: bash
+        run: exit 1
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.USER_NAME }}/arcane_${{ inputs.os_base }}
+          labels: |
+            org.opencontainers.image.title=ArcaneFramework
+            org.opencontainers.image.description=Arcane Framework Image
+            org.opencontainers.image.vendor=CEA
+          tags: |
+            type=raw, ${{ inputs.compiler }}_${{ inputs.dependencies }}_${{ inputs.type_build }}_latest
+            type=raw, ${{ inputs.compiler }}_${{ inputs.dependencies }}_${{ inputs.type_build }}_{{date 'YYYYMMDD'}}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v3
+        with:
+          file: ${{ env.DOCKERFILE_PATH }}/${{ inputs.os_base }}/${{ inputs.compiler }}/${{ inputs.dependencies }}/${{ inputs.type_build }}/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}

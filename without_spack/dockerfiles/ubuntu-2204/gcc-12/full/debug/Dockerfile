@@ -13,15 +13,15 @@ RUN cd /tmp \
         -S /tmp/framework \
         -B /tmp/build \
         -G Ninja \
+        -D BUILD_SHARED_LIBS=ON \
         -D CMAKE_C_COMPILER=gcc \
         -D CMAKE_CXX_COMPILER=g++ \
         -D ARCCORE_CXX_STANDARD=23 \
         -D PTScotch_INCLUDE_DIR="/usr/include/scotch" \
+        -D ARCANE_DEFAULT_PARTITIONER=Metis \
         -D CMAKE_BUILD_TYPE=Debug \
         -D ARCCORE_BUILD_MODE=Debug \
         -D ARCANE_BUILD_TYPE=Debug \
-        -D BUILD_SHARED_LIBS=ON \
-        -D ARCANE_DEFAULT_PARTITIONER=Metis \
     && cmake --build /tmp/build --target install \
     && cd / && rm -rf /tmp/*
 

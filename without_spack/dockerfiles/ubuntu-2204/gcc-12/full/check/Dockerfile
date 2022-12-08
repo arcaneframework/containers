@@ -1,5 +1,5 @@
 # Ubuntu 22.04 full dependencies.
-# Arcane version Release compiled with GCC 12.
+# Arcane version Check compiled with GCC 12.
 
 FROM ghcr.io/arcaneframework/ubuntu-2204:gcc-12_clang-14_full
 
@@ -20,8 +20,8 @@ RUN cd /tmp \
         -D PTScotch_INCLUDE_DIR="/usr/include/scotch" \
         -D ARCANE_DEFAULT_PARTITIONER=Metis \
         -D CMAKE_BUILD_TYPE=Release \
-        -D ARCCORE_BUILD_MODE=Release \
-        -D ARCANE_BUILD_TYPE=Release \
+        -D ARCCORE_BUILD_MODE=Check \
+        -D ARCANE_BUILD_TYPE=Check \
     && cmake --build /tmp/build --target install \
     && cd / && rm -rf /tmp/*
 

@@ -1,0 +1,25 @@
+# Ubuntu 22.04 minimal dependencies.
+# Arcane version Release compiled with GCC 12.
+
+FROM ghcr.io/arcaneframework/ubuntu-2204:gcc-12_clang-14_minimal
+
+ARG DEBIAN_FRONTEND=noninteractive
+ARG TZ=Europe/Paris
+
+RUN cd /tmp \
+    && git clone --recurse-submodules https://github.com/arcaneframework/framework \
+    && mkdir build \
+    && cmake \
+        -S /tmp/framework \
+        -B /tmp/build \
+        -G Ninja \
+        -D CMAKE_C_COMPILER=gcc \
+        -D CMAKE_CXX_COMPILER=g++ \
+        -D ARCCORE_CXX_STANDARD=23 \
+        -D CMAKE_BUILD_TYPE=Release \
+        -D ARCCORE_BUILD_MODE=Release \
+        -D ARCANE_BUILD_TYPE=Release \
+        -D BUILD_SHARED_LIBS=ON \
+        -D ARCANE_DEFAULT_PARTITIONER=Metis \
+    && cmake --build /tmp/build --target install \
+    && cd / && rm -rf /tmp/*

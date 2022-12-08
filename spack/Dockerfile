@@ -28,7 +28,7 @@ RUN mkdir -p recipes && \
 
 ADD import_signing_key.sh /tmp
 
-RUN --mount=type=secret,id=signingkey,uid=1000 /tmp/import_signing_key.sh /run/secrets/signingkey
+RUN --mount=type=secret,id=signingkey /tmp/import_signing_key.sh /run/secrets/signingkey
 
 FROM base AS builder
 

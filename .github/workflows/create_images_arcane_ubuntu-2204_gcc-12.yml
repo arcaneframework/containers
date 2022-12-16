@@ -11,6 +11,7 @@ on:
         type: choice
         options:
         - 'ubuntu-2204'
+        - 'ubuntu-2004'
 
       compiler:
         description: 'Compiler'
@@ -18,7 +19,17 @@ on:
         default: 'gcc-12'
         type: choice
         options:
+        - 'gcc'
         - 'gcc-12'
+        - 'gcc-11'
+        - 'clang'
+        - 'clang-15'
+        - 'clang-14'
+        - 'clang-13'
+        - 'cuda'
+        - 'cuda-116'
+        - 'cuda-117'
+        - 'cuda-118'
 
       dependencies:
         description: 'Dependencies'
@@ -28,6 +39,7 @@ on:
         options:
         - 'full'
         - 'minimal'
+        - 'doc'
 
       type_build:
         description: 'Type Build'
@@ -43,7 +55,6 @@ on:
 env:
   REGISTRY: 'ghcr.io'
   USER_NAME: 'arcaneframework'
-  DOCKERFILE_PATH: './without_spack/dockerfiles'
 
 jobs:
   build-and-push:
@@ -54,38 +65,37 @@ jobs:
       packages: write
 
     steps:
-      - name: Verif minimal check
-        if: ${{ inputs.os_base == 'ubuntu-2204' && inputs.compiler == 'gcc-12' && inputs.dependencies == 'minimal' && inputs.type_build == 'check'}}
-        shell: bash
-        run: exit 1
-
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Log in to the Container registry
-        uses: docker/login-action@v2
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Generate Dockerfile
+        shell: 'bash'
+        run: ./.github/scripts/DockerfileGenerator.sh
 
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v4
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.USER_NAME }}/arcane_${{ inputs.os_base }}
-          labels: |
-            org.opencontainers.image.title=ArcaneFramework
-            org.opencontainers.image.description=Arcane Framework Image
-            org.opencontainers.image.vendor=CEA
-          tags: |
-            type=raw, ${{ inputs.compiler }}_${{ inputs.dependencies }}_${{ inputs.type_build }}_latest
-            type=raw, ${{ inputs.compiler }}_${{ inputs.dependencies }}_${{ inputs.type_build }}_{{date 'YYYYMMDD'}}
+      # - name: Log in to the Container registry
+      #   uses: docker/login-action@v2
+      #   with:
+      #     registry: ${{ env.REGISTRY }}
+      #     username: ${{ github.actor }}
+      #     password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v3
-        with:
-          file: ${{ env.DOCKERFILE_PATH }}/${{ inputs.os_base }}/${{ inputs.compiler }}/${{ inputs.dependencies }}/${{ inputs.type_build }}/Dockerfile
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+      # - name: Extract metadata (tags, labels) for Docker
+      #   id: meta
+      #   uses: docker/metadata-action@v4
+      #   with:
+      #     images: ${{ env.REGISTRY }}/${{ env.USER_NAME }}/arcane_${{ inputs.os_base }}
+      #     labels: |
+      #       org.opencontainers.image.title=ArcaneFramework
+      #       org.opencontainers.image.description=Arcane Framework Image
+      #       org.opencontainers.image.vendor=CEA
+      #     tags: |
+      #       type=raw, ${{ inputs.compiler }}_${{ inputs.dependencies }}_${{ inputs.type_build }}_latest
+      #       type=raw, ${{ inputs.compiler }}_${{ inputs.dependencies }}_${{ inputs.type_build }}_{{date 'YYYYMMDD'}}
+
+      # - name: Build and push Docker image
+      #   uses: docker/build-push-action@v3
+      #   with:
+      #     file: ${{ env.DOCKERFILE_PATH }}/${{ inputs.os_base }}/${{ inputs.compiler }}/${{ inputs.dependencies }}/${{ inputs.type_build }}/Dockerfile
+      #     push: true
+      #     tags: ${{ steps.meta.outputs.tags }}
+      #     labels: ${{ steps.meta.outputs.labels }}

@@ -55,6 +55,8 @@ on:
 env:
   REGISTRY: 'ghcr.io'
   USER_NAME: 'arcaneframework'
+  DOCKERFILE_IN: './.github/scripts/Dockerfile.in'
+  DOCKERFILE_OUT: './Dockerfile'
 
 jobs:
   build-and-push:
@@ -76,15 +78,8 @@ jobs:
           --compiler ${{ inputs.compiler }} \
           --image_version ${{ inputs.dependencies }} \
           --build_type ${{ inputs.build_type }} \
-          --dockerfile_in ./.github/scripts/Dockerfile.in \
-          --dockerfile_out ./Dockerfile
-
-      - name: Upload Dockerfile generated
-        uses: actions/upload-artifact@v3
-        with:
-          name: dockerfile-artifact
-          path: ./Dockerfile
-          retention-days: 7
+          --dockerfile_in ${{ env.DOCKERFILE_IN }} \
+          --dockerfile_out ${{ env.DOCKERFILE_OUT }} 
 
       - name: Log in to the Container registry
         uses: docker/login-action@v2
@@ -109,7 +104,18 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
         with:
-          file: ./Dockerfile
+          file: ${{ env.DOCKERFILE_OUT }} 
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Display error
+        if: ${{ failure() }}
+        run: echo "::error::Base image unknown"
+
+      - name: Upload Dockerfile generated
+        uses: actions/upload-artifact@v3
+        with:
+          name: dockerfile-artifact
+          path: ${{ env.DOCKERFILE_OUT }} 
+          retention-days: 7

@@ -1,0 +1,34 @@
+# @OS@ @IMAGE_VERSION@ dependencies.
+# Arcane version @BUILD_TYPE@ compiled with @COMPILER_NAME@@COMPILER_VERSION_WITH_DASH@.
+
+# Dockerfile generated on @DATE@.
+
+FROM ghcr.io/arcaneframework/@OS@:@COMPILER_NAME@@COMPILER_VERSION_WITH_DASH@_@IMAGE_VERSION@_@BASE_IMAGE_DATE@
+
+ARG DEBIAN_FRONTEND=noninteractive
+ARG TZ=Europe/Paris
+
+ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
+
+RUN cd /tmp \
+    && git clone --recurse-submodules https://github.com/arcaneframework/framework \
+    && mkdir build \
+    && cmake \
+        -S /tmp/framework \
+        -B /tmp/build \
+        -G Ninja \
+        -D BUILD_SHARED_LIBS=ON \
+        -D CMAKE_C_COMPILER=@C_COMPILER@ \
+        -D CMAKE_CXX_COMPILER=@CXX_COMPILER@ \
+        -D ARCCORE_CXX_STANDARD=23 \
+        -D ARCANE_DEFAULT_PARTITIONER=Metis \
+        -D CMAKE_BUILD_TYPE=@CMAKE_BUILD_TYPE@ \
+        -D ARCCORE_BUILD_MODE=@ARCCORE_BUILD_MODE@ \
+        -D ARCANE_BUILD_TYPE=@ARCANE_BUILD_TYPE@ \
+        @ADDED_CMAKE@ \
+    && cmake --build /tmp/build --target install \
+    && cd / && rm -rf /tmp/*
+
+RUN useradd -ms /bin/bash arcane_user
+USER arcane_user
+WORKDIR /home/arcane_user

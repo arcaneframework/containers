@@ -1,16 +1,17 @@
-name: '[ARC_U22:G12] Image Creator'
+name: 'Image Creator'
 
 on:
   # A executer que lorsque l'on demande.
   workflow_dispatch:
     inputs:
       os_base:
-        description: 'OS Base'
+        description: 'OS base'
         required: true
         default: 'ubuntu-2204'
         type: choice
         options:
         - 'ubuntu-2204'
+        - 'ubuntu-2004'
 
       compiler:
         description: 'Compiler'
@@ -19,6 +20,13 @@ on:
         type: choice
         options:
         - 'gcc-12'
+        - 'gcc-11'
+        - 'clang-15'
+        - 'clang-14'
+        - 'clang-13'
+        - 'cuda-116'
+        - 'cuda-117'
+        - 'cuda-118'
 
       dependencies:
         description: 'Dependencies'
@@ -28,9 +36,10 @@ on:
         options:
         - 'full'
         - 'minimal'
+        - 'doc'
 
-      type_build:
-        description: 'Type Build'
+      build_type:
+        description: 'Build type'
         required: true
         default: 'release'
         type: choice
@@ -39,11 +48,16 @@ on:
         - 'debug'
         - 'check'
 
+      dockerfile_only:
+        description: 'Generate only the Dockerfile (upload as artifact)'
+        required: true
+        type: boolean
 
 env:
   REGISTRY: 'ghcr.io'
   USER_NAME: 'arcaneframework'
-  DOCKERFILE_PATH: './without_spack/dockerfiles'
+  DOCKERFILE_IN: './.github/scripts/Dockerfile.in'
+  DOCKERFILE_OUT: './Dockerfile'
 
 jobs:
   build-and-push:
@@ -54,16 +68,23 @@ jobs:
       packages: write
 
     steps:
-      - name: Verif minimal check
-        if: ${{ inputs.os_base == 'ubuntu-2204' && inputs.compiler == 'gcc-12' && inputs.dependencies == 'minimal' && inputs.type_build == 'check'}}
-        shell: bash
-        run: exit 1
-
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Generate Dockerfile
+        shell: 'bash'
+        run: |
+          ./.github/scripts/DockerfileGenerator.sh \
+          --os ${{ inputs.os_base }} \
+          --compiler ${{ inputs.compiler }} \
+          --image_version ${{ inputs.dependencies }} \
+          --build_type ${{ inputs.build_type }} \
+          --dockerfile_in ${{ env.DOCKERFILE_IN }} \
+          --dockerfile_out ${{ env.DOCKERFILE_OUT }} 
+
       - name: Log in to the Container registry
         uses: docker/login-action@v2
+        if: ${{ ! inputs.dockerfile_only }}
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -72,6 +93,7 @@ jobs:
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@v4
+        if: ${{ ! inputs.dockerfile_only }}
         with:
           images: ${{ env.REGISTRY }}/${{ env.USER_NAME }}/arcane_${{ inputs.os_base }}
           labels: |
@@ -79,13 +101,26 @@ jobs:
             org.opencontainers.image.description=Arcane Framework Image
             org.opencontainers.image.vendor=CEA
           tags: |
-            type=raw, ${{ inputs.compiler }}_${{ inputs.dependencies }}_${{ inputs.type_build }}_latest
-            type=raw, ${{ inputs.compiler }}_${{ inputs.dependencies }}_${{ inputs.type_build }}_{{date 'YYYYMMDD'}}
+            type=raw, ${{ inputs.compiler }}_${{ inputs.dependencies }}_${{ inputs.build_type }}_latest
+            type=raw, ${{ inputs.compiler }}_${{ inputs.dependencies }}_${{ inputs.build_type }}_{{date 'YYYYMMDD'}}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
+        if: ${{ ! inputs.dockerfile_only }}
         with:
-          file: ${{ env.DOCKERFILE_PATH }}/${{ inputs.os_base }}/${{ inputs.compiler }}/${{ inputs.dependencies }}/${{ inputs.type_build }}/Dockerfile
+          context: .
+          file: ${{ env.DOCKERFILE_OUT }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Display error
+        if: ${{ failure() }}
+        run: echo "::error::Base image unknown, see available images here https://github.com/arcaneframework/framework-ci#images-disponibles"
+
+      - name: Upload Dockerfile generated
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ inputs.compiler }}_${{ inputs.dependencies }}_${{ inputs.build_type }}_dockerfile
+          path: ${{ env.DOCKERFILE_OUT }} 
+          retention-days: 7

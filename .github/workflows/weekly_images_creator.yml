@@ -1,4 +1,4 @@
-name: '[ARC_U22:G12] Weekly Image Creator'
+name: 'Weekly Images Creator'
 
 on:
   schedule:
@@ -10,7 +10,8 @@ on:
 env:
   REGISTRY: 'ghcr.io'
   USER_NAME: 'arcaneframework'
-  DOCKERFILE_PATH: './without_spack/dockerfiles'
+  DOCKERFILE_IN: './.github/scripts/Dockerfile.in'
+  DOCKERFILE_OUT: './Dockerfile'
 
 jobs:
   build-and-push:
@@ -20,15 +21,15 @@ jobs:
         os_base: ['ubuntu-2204']
         compiler: ['gcc-12']
         dependencies: ['full', 'minimal']
-        type_build: ['release', 'debug', 'check']
+        build_type: ['release', 'debug', 'check']
 
         exclude:
           - os_base: 'ubuntu-2204'
             compiler: 'gcc-12'
             dependencies: 'minimal'
-            type_build: 'check'
+            build_type: 'check'
 
-    name: Build and Push arcane_${{ matrix.os_base }}:${{ matrix.compiler }}_${{ matrix.dependencies }}_${{ matrix.type_build }}
+    name: Build and Push arcane_${{ matrix.os_base }}:${{ matrix.compiler }}_${{ matrix.dependencies }}_${{ matrix.build_type }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -37,6 +38,17 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+
+      - name: Generate Dockerfile
+        shell: 'bash'
+        run: |
+          ./.github/scripts/DockerfileGenerator.sh \
+          --os ${{ matrix.os_base }} \
+          --compiler ${{ matrix.compiler }} \
+          --image_version ${{ matrix.dependencies }} \
+          --build_type ${{ matrix.build_type }} \
+          --dockerfile_in ${{ env.DOCKERFILE_IN }} \
+          --dockerfile_out ${{ env.DOCKERFILE_OUT }} 
 
       - name: Log in to the Container registry
         uses: docker/login-action@v2
@@ -55,13 +67,25 @@ jobs:
             org.opencontainers.image.description=Arcane Framework Image
             org.opencontainers.image.vendor=CEA
           tags: |
-            type=raw, ${{ matrix.compiler }}_${{ matrix.dependencies }}_${{ matrix.type_build }}_latest
-            type=raw, ${{ matrix.compiler }}_${{ matrix.dependencies }}_${{ matrix.type_build }}_{{date 'YYYYMMDD'}}
+            type=raw, ${{ matrix.compiler }}_${{ matrix.dependencies }}_${{ matrix.build_type }}_latest
+            type=raw, ${{ matrix.compiler }}_${{ matrix.dependencies }}_${{ matrix.build_type }}_{{date 'YYYYMMDD'}}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
         with:
-          file: ${{ env.DOCKERFILE_PATH }}/${{ matrix.os_base }}/${{ matrix.compiler }}/${{ matrix.dependencies }}/${{ matrix.type_build }}/Dockerfile
+          context: .
+          file: ${{ env.DOCKERFILE_OUT }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Display error
+        if: ${{ failure() }}
+        run: echo "::error::Base image unknown, see available images here https://github.com/arcaneframework/framework-ci#images-disponibles"
+
+      - name: Upload Dockerfile generated
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.compiler }}_${{ matrix.dependencies }}_${{ matrix.build_type }}_dockerfile
+          path: ${{ env.DOCKERFILE_OUT }} 
+          retention-days: 7

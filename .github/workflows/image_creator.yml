@@ -1,4 +1,4 @@
-name: '[ARC_U22:G12] Image Creator'
+name: 'Image Creator'
 
 on:
   # A executer que lorsque l'on demande.
@@ -19,14 +19,11 @@ on:
         default: 'gcc-12'
         type: choice
         options:
-        - 'gcc'
         - 'gcc-12'
         - 'gcc-11'
-        - 'clang'
         - 'clang-15'
         - 'clang-14'
         - 'clang-13'
-        - 'cuda'
         - 'cuda-116'
         - 'cuda-117'
         - 'cuda-118'
@@ -51,6 +48,10 @@ on:
         - 'debug'
         - 'check'
 
+      dockerfile_only:
+        description: 'Generate only the Dockerfile (upload as artifact)'
+        required: true
+        type: boolean
 
 env:
   REGISTRY: 'ghcr.io'
@@ -83,6 +84,7 @@ jobs:
 
       - name: Log in to the Container registry
         uses: docker/login-action@v2
+        if: ${{ ! inputs.dockerfile_only }}
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -91,6 +93,7 @@ jobs:
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@v4
+        if: ${{ ! inputs.dockerfile_only }}
         with:
           images: ${{ env.REGISTRY }}/${{ env.USER_NAME }}/arcane_${{ inputs.os_base }}
           labels: |
@@ -103,6 +106,7 @@ jobs:
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
+        if: ${{ ! inputs.dockerfile_only }}
         with:
           context: .
           file: ${{ env.DOCKERFILE_OUT }}
@@ -112,11 +116,11 @@ jobs:
 
       - name: Display error
         if: ${{ failure() }}
-        run: echo "::error::Base image unknown"
+        run: echo "::error::Base image unknown, see available images here https://github.com/arcaneframework/framework-ci#images-disponibles"
 
       - name: Upload Dockerfile generated
         uses: actions/upload-artifact@v3
         with:
-          name: dockerfile-artifact
+          name: ${{ inputs.compiler }}_${{ inputs.dependencies }}_${{ inputs.build_type }}_dockerfile
           path: ${{ env.DOCKERFILE_OUT }} 
           retention-days: 7

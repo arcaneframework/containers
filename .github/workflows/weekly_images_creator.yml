@@ -1,4 +1,4 @@
-name: 'Weekly Image Creator'
+name: 'Weekly Images Creator'
 
 on:
   schedule:
@@ -12,7 +12,7 @@ env:
   USER_NAME: 'arcaneframework'
   DOCKERFILE_IN: './.github/scripts/Dockerfile.in'
   DOCKERFILE_OUT: './Dockerfile'
-  
+
 jobs:
   build-and-push:
     strategy:

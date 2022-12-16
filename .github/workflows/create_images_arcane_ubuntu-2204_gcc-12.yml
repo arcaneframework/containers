@@ -84,32 +84,32 @@ jobs:
         with:
           name: dockerfile-artifact
           path: ./Dockerfile
-          retention-days: 3
+          retention-days: 7
 
-      # - name: Log in to the Container registry
-      #   uses: docker/login-action@v2
-      #   with:
-      #     registry: ${{ env.REGISTRY }}
-      #     username: ${{ github.actor }}
-      #     password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      # - name: Extract metadata (tags, labels) for Docker
-      #   id: meta
-      #   uses: docker/metadata-action@v4
-      #   with:
-      #     images: ${{ env.REGISTRY }}/${{ env.USER_NAME }}/arcane_${{ inputs.os_base }}
-      #     labels: |
-      #       org.opencontainers.image.title=ArcaneFramework
-      #       org.opencontainers.image.description=Arcane Framework Image
-      #       org.opencontainers.image.vendor=CEA
-      #     tags: |
-      #       type=raw, ${{ inputs.compiler }}_${{ inputs.dependencies }}_${{ inputs.type_build }}_latest
-      #       type=raw, ${{ inputs.compiler }}_${{ inputs.dependencies }}_${{ inputs.type_build }}_{{date 'YYYYMMDD'}}
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.USER_NAME }}/arcane_${{ inputs.os_base }}
+          labels: |
+            org.opencontainers.image.title=ArcaneFramework
+            org.opencontainers.image.description=Arcane Framework Image
+            org.opencontainers.image.vendor=CEA
+          tags: |
+            type=raw, ${{ inputs.compiler }}_${{ inputs.dependencies }}_${{ inputs.build_type }}_latest
+            type=raw, ${{ inputs.compiler }}_${{ inputs.dependencies }}_${{ inputs.build_type }}_{{date 'YYYYMMDD'}}
 
-      # - name: Build and push Docker image
-      #   uses: docker/build-push-action@v3
-      #   with:
-      #     file: ${{ env.DOCKERFILE_PATH }}/${{ inputs.os_base }}/${{ inputs.compiler }}/${{ inputs.dependencies }}/${{ inputs.type_build }}/Dockerfile
-      #     push: true
-      #     tags: ${{ steps.meta.outputs.tags }}
-      #     labels: ${{ steps.meta.outputs.labels }}
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v3
+        with:
+          file: ./Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}

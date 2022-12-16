@@ -14,6 +14,7 @@
 # -----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------
 
+# v1.2
 
 # Valeurs par défaut.
 OS=''
@@ -39,21 +40,29 @@ ADDED_CMAKE=''
 f_help() {
   echo "This script can generate a Dockerfile including Arcane installation from a Docker base image."
   echo "The list of base images can be found here: https://github.com/arcaneframework/framework-ci"
+  echo "Warning: There is no automatic check if the base image exists or not."
   echo ""
   echo "Usage: $(basename $0) [OPTIONS]"
   echo "  -h, --help                display this help"
-  echo "  -s, --os                  choose the operating system of the base image (ex: -s ubuntu-2204)"
-  echo "  -c, --compiler            choose the compiler to compile Arcane (name-version) (ex: -c gcc-12)"
-  echo "  -n, --compiler_name       choose the compiler to compile Arcane (gcc/clang) (ex: -n gcc)"
-  echo "  -v, --compiler_version    choose the compiler version (ex: -v 12) (optionnal)"
-  echo "  -b, --image_version       choose the version of the base image (full/minimal/doc) (ex: -b full)"
-  echo "  -a, --build_type          choose the Arcane build type (debug/check/release) (ex: -a debug)"
-  echo "  -d, --base_image_date     choose the date of the base image (default: latest) (ex: -d 20221230)"
-  echo "  -i, --dockerfile_in       location of the Dockerfile.in (same folder by default) (ex: -i \"./df/Dockerfile.in\")"
-  echo "  -o, --dockerfile_out      location for the result Dockerfile (same folder by default) (ex: -o \"./df/Dockerfile\")"
+  echo "  -s, --os                  choose the operating system of the base image"
+  echo "                            (ex: -s ubuntu-2204)"
+  echo "  -c, --compiler            choose the compiler to compile Arcane (gcc/clang) ('name-version' OR just 'name')"
+  echo "                            (ex: -c gcc-12) (ex: -c gcc)"
+  echo "  -v, --compiler_version    choose the compiler version (optionnal, if just 'name' in --compiler option)"
+  echo "                            (ex: -c gcc -v 12)"
+  echo "  -b, --image_version       choose the version of the base image (full/minimal/doc)"
+  echo "                            (ex: -b full)"
+  echo "  -a, --build_type          choose the Arcane build type (debug/check/release)"
+  echo "                            (ex: -a debug)"
+  echo "  -d, --base_image_date     choose the date of the base image (default: latest)"
+  echo "                            (ex: -d 20221230)"
+  echo "  -i, --dockerfile_in       location of the Dockerfile.in (same folder by default)"
+  echo "                            (ex: -i \"./df/Dockerfile.in\")"
+  echo "  -o, --dockerfile_out      location for the result Dockerfile (same folder by default)"
+  echo "                            (ex: -i \"./df/Dockerfile\")"
   echo ""
-  echo "To choose a compiler, you can use the '-c' option OR the '-n' and '-v' options."
-  echo "You can use only the '-n' option if you want the latest version of the compiler."
+  echo "To choose a compiler, you can use the '-c' option OR the '-c' and '-v' options."
+  echo "You can use only the '-c' option if you want the latest version of the compiler."
   echo ""
   echo "This script needs a Dockerfile.in file."
 }
@@ -79,10 +88,6 @@ do
       ;;
     -c | --compiler)
       COMPILER="$2"
-      shift
-      ;;
-    -n | --compiler_name)
-      COMPILER_NAME="$2"
       shift
       ;;
     -v | --compiler_version)
@@ -120,14 +125,14 @@ done
 
 
 # On traite le cas où on utilise l'option '-c'.
-# Si l'option '-c' est utilisé avec l'option '-n' ou '-v',
-# on ne peut pas savoir ce que veut exactement l'utilisateur.
-if [ -n "$COMPILER" ] && ([ -n "$COMPILER_NAME" ] || [ -n "$COMPILER_VERSION" ])
+# S'il n'y a pas de tiret dans le nom du compilateur,
+# c'est que l'utilisateur n'a pas donné de version
+# (ou alors il a donné une version avec l'option -v).
+if [[ ! "$COMPILER" =~ .*-.* ]]
 then
-  echo "You cannot use '-c' option with '-n' or '-v' options."
-  f_help
-  exit 1
-# Si l'utilisateur a entré uniquement l'option '-c', on remplit
+  COMPILER_NAME=$COMPILER
+
+# Si l'utilisateur a entré l'option '-c' avec une version, on remplit
 # les variables $COMPILER_NAME et $COMPILER_VERSION en splitant
 # l'entrée utilisateur en deux.
 elif [ -n "$COMPILER" ]

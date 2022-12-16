@@ -121,6 +121,6 @@ jobs:
       - name: Upload Dockerfile generated
         uses: actions/upload-artifact@v3
         with:
-          name: arcane_${{ inputs.os_base }}:${{ inputs.compiler }}_${{ inputs.dependencies }}_${{ inputs.build_type }}_dockerfile
+          name: arcane_${{ inputs.os_base }}_${{ inputs.compiler }}_${{ inputs.dependencies }}_${{ inputs.build_type }}_dockerfile
           path: ${{ env.DOCKERFILE_OUT }} 
           retention-days: 7

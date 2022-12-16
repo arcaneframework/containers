@@ -75,7 +75,7 @@ jobs:
           --os ${{ inputs.os_base }} \
           --compiler ${{ inputs.compiler }} \
           --image_version ${{ inputs.dependencies }} \
-          --build_type ${{ inputs.type_build }} \
+          --build_type ${{ inputs.build_type }} \
           --dockerfile_in ./.github/scripts/Dockerfile.in \
           --dockerfile_out ./Dockerfile
 

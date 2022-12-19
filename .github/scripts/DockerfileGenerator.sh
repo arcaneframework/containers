@@ -33,7 +33,7 @@ CXX_COMPILER=''
 CMAKE_BUILD_TYPE=''
 ARCCORE_BUILD_MODE=''
 ARCANE_BUILD_TYPE=''
-ADDED_CMAKE=''
+CMAKE_CONFIG=''
 
 
 # Fonction permettant d'afficher l'aide.
@@ -247,11 +247,11 @@ then
 
 elif [ "$IMAGE_VERSION" = 'full' ]
 then
-  ADDED_CMAKE+='-D PTScotch_INCLUDE_DIR="/usr/include/scotch" '
+  CMAKE_CONFIG+='-D PTScotch_INCLUDE_DIR="/usr/include/scotch" '
 
 elif [ "$IMAGE_VERSION" = 'minimal' ] || [ "$IMAGE_VERSION" = 'doc' ]
 then
-  ADDED_CMAKE+=''
+  CMAKE_CONFIG+=''
 
 else
   echo "Unknown image version: $IMAGE_VERSION"
@@ -275,7 +275,7 @@ echo "CXX_COMPILER=       $CXX_COMPILER"
 echo "CMAKE_BUILD_TYPE=   $CMAKE_BUILD_TYPE"
 echo "ARCCORE_BUILD_MODE= $ARCCORE_BUILD_MODE"
 echo "ARCANE_BUILD_TYPE=  $ARCANE_BUILD_TYPE"
-echo "ADDED_CMAKE=        $ADDED_CMAKE"
+echo "CMAKE_CONFIG=       $CMAKE_CONFIG"
 echo ""
 echo "IMAGE_BASE=         $OS"":""$COMPILER_NAME$COMPILER_VERSION_WITH_DASH""_""$IMAGE_VERSION""_latest"
 echo "DOCKERFILE.IN=      $DFIN"
@@ -297,7 +297,7 @@ s:@BASE_IMAGE_DATE@:$BASE_IMAGE_DATE:g; \
 s:@CMAKE_BUILD_TYPE@:$CMAKE_BUILD_TYPE:g; \
 s:@ARCCORE_BUILD_MODE@:$ARCCORE_BUILD_MODE:g; \
 s:@ARCANE_BUILD_TYPE@:$ARCANE_BUILD_TYPE:g; \
-s:@ADDED_CMAKE@:$ADDED_CMAKE:g; \
+s:@CMAKE_CONFIG@:$CMAKE_CONFIG:g; \
 s*@DATE@*$(date +'%d/%m/%Y at %H:%M:%S')*g; \
 " $DFIN > $DFOUT
 then

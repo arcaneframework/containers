@@ -25,7 +25,7 @@ RUN cd /tmp \
         -D CMAKE_BUILD_TYPE=@CMAKE_BUILD_TYPE@ \
         -D ARCCORE_BUILD_MODE=@ARCCORE_BUILD_MODE@ \
         -D ARCANE_BUILD_TYPE=@ARCANE_BUILD_TYPE@ \
-        @ADDED_CMAKE@ \
+        @CMAKE_CONFIG@ \
     && cmake --build /tmp/build --target install \
     && cd / && rm -rf /tmp/*
 

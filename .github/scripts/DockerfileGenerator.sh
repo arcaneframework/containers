@@ -14,7 +14,7 @@
 # -----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------
 
-# v1.2
+# v1.3
 
 # Valeurs par défaut.
 OS=''
@@ -46,7 +46,7 @@ f_help() {
   echo "  -h, --help                display this help"
   echo "  -s, --os                  choose the operating system of the base image"
   echo "                            (ex: -s ubuntu-2204)"
-  echo "  -c, --compiler            choose the compiler to compile Arcane (gcc/clang) ('name-version' OR just 'name')"
+  echo "  -c, --compiler            choose the compiler to compile Arcane (gcc/clang/cuda) ('name-version' OR just 'name')"
   echo "                            (ex: -c gcc-12) (ex: -c gcc)"
   echo "  -v, --compiler_version    choose the compiler version (optionnal, if just 'name' in --compiler option)"
   echo "                            (ex: -c gcc -v 12)"
@@ -61,8 +61,11 @@ f_help() {
   echo "  -o, --dockerfile_out      location for the result Dockerfile (same folder by default)"
   echo "                            (ex: -i \"./df/Dockerfile\")"
   echo ""
-  echo "To choose a compiler, you can use the '-c' option OR the '-c' and '-v' options."
-  echo "You can use only the '-c' option if you want the latest version of the compiler."
+  echo "Notes:"
+  echo " - To choose a compiler, you can use the '-c' option OR the '-c' and '-v' options."
+  echo " - You can use only the '-c' option if you want the latest version of the compiler."
+  echo " - If you choose 'cuda' in the compiler option, only '.cu' files will be compiled with 'nvcc'."
+  echo "   Other C/C++ files will be compiled with the gcc/g++ compiler available in base image."
   echo ""
   echo "This script needs a Dockerfile.in file."
 }
@@ -199,6 +202,12 @@ then
   C_COMPILER='clang'
   CXX_COMPILER='clang++'
 
+elif [ "$COMPILER_NAME" = 'cuda' ]
+then
+  C_COMPILER='gcc'
+  CXX_COMPILER='g++'
+  CMAKE_CONFIG+='-D ARCANE_ACCELERATOR_MODE=CUDANVCC -D CMAKE_CUDA_COMPILER=nvcc '
+
 else
   echo "Unknown compiler: $COMPILER_NAME"
   f_help
@@ -272,6 +281,10 @@ echo "BASE_IMAGE_DATE=    $BASE_IMAGE_DATE"
 echo ""
 echo "C_COMPILER=         $C_COMPILER"
 echo "CXX_COMPILER=       $CXX_COMPILER"
+if [ "$COMPILER_NAME" = 'cuda' ]
+then
+  echo "CUDA_COMPILER=      nvcc"
+fi
 echo "CMAKE_BUILD_TYPE=   $CMAKE_BUILD_TYPE"
 echo "ARCCORE_BUILD_MODE= $ARCCORE_BUILD_MODE"
 echo "ARCANE_BUILD_TYPE=  $ARCANE_BUILD_TYPE"

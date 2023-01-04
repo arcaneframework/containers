@@ -65,6 +65,12 @@ date.
 If you want to have the same working environment, the same versions of
 the tools permanently (to reproduce bugs for example), this tag is good.
 
+Warning : The image tag with `cuda` will (probably) be changed in the future
+with the addition of "gcc" or "clang" in it.
+Exemple :
+- Now : `cuda-120_full_release_latest`
+- In the future : `gcc-cuda-120_full_release_latest`
+
 
 ### Base images
 

@@ -24,9 +24,10 @@ on:
         - 'clang-15'
         - 'clang-14'
         - 'clang-13'
-        - 'cuda-116'
-        - 'cuda-117'
+        - 'cuda-120'
         - 'cuda-118'
+        - 'cuda-117'
+        - 'cuda-116'
 
       dependencies:
         description: 'Dependencies'

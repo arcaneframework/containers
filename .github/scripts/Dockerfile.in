@@ -9,6 +9,8 @@ ARG DEBIAN_FRONTEND=noninteractive
 ARG TZ=Europe/Paris
 
 ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
+ENV OMPI_ALLOW_RUN_AS_ROOT=1
+ENV OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
 
 RUN cd /tmp \
     && git clone --recurse-submodules https://github.com/arcaneframework/framework \
@@ -29,6 +31,6 @@ RUN cd /tmp \
     && cmake --build /tmp/build --target install \
     && cd / && rm -rf /tmp/*
 
-RUN useradd -ms /bin/bash arcane_user
-USER arcane_user
-WORKDIR /home/arcane_user
+# RUN useradd -ms /bin/bash arcane_user
+# USER arcane_user
+# WORKDIR /home/arcane_user

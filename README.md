@@ -149,22 +149,17 @@ cd .github/scripts
 
 In these images, Arcane is installed in the default installation
 directory (`/usr/local`).
-A user is also created and used by default. This is the user
-`arcane_user`.
-Note that `sudo` is not available, so if you want to run commands
-as `root`, you need to specify the `root` user in the execute command:
-`docker exec -u root -it <image> bash`.
 If you want to compile an application using Arcane, it is not necessary
 to specify the Arcane installation directory.
 
 Here is a set of commands to compile and run `QAMA` in container :
 ```bash
-# In a termuinal, with Podman or Docker installed.
+# In a terminal, with Podman or Docker installed.
 IMAGE_ID=$(docker pull ghcr.io/arcaneframework/arcane_ubuntu-2204:gcc-12_minimal_release_latest)
 CONTAINER_ID=$(docker run -dt "$IMAGE_ID")
 docker exec -it "$CONTAINER_ID" bash
 
-# Interactive terminal of contener.
+# Interactive terminal of container.
 cd /tmp
 git clone https://github.com/arcaneframework/arcane-benchs
 mkdir build/

@@ -109,7 +109,7 @@ jobs:
             type=raw, ${{ inputs.compiler }}_${{ inputs.dependencies }}_${{ inputs.build_type }}_{{date 'YYYYMMDD'}}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         if: ${{ ! inputs.dockerfile_only }}
         with:
           context: .

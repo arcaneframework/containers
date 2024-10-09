@@ -18,14 +18,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os_base: ['ubuntu-2204']
-        compiler: ['gcc-12']
+        os_base: ['ubuntu-2404']
+        compiler: ['gcc-14']
         dependencies: ['full', 'minimal']
         build_type: ['release', 'debug', 'check']
 
         exclude:
-          - os_base: 'ubuntu-2204'
-            compiler: 'gcc-12'
+          - os_base: 'ubuntu-2404'
+            compiler: 'gcc-14'
             dependencies: 'minimal'
             build_type: 'check'
 
@@ -37,7 +37,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Generate Dockerfile
         shell: 'bash'
@@ -51,7 +51,7 @@ jobs:
           --dockerfile_out ${{ env.DOCKERFILE_OUT }} 
 
       - name: Log in to the Container registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -59,7 +59,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.USER_NAME }}/arcane_${{ matrix.os_base }}
           labels: |
@@ -71,7 +71,7 @@ jobs:
             type=raw, ${{ matrix.compiler }}_${{ matrix.dependencies }}_${{ matrix.build_type }}_{{date 'YYYYMMDD'}}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ${{ env.DOCKERFILE_OUT }}
@@ -84,7 +84,7 @@ jobs:
         run: echo "::error::Base image unknown, see available images here https://github.com/arcaneframework/framework-ci#images-disponibles"
 
       - name: Upload Dockerfile generated
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: arcane_${{ matrix.os_base }}_${{ matrix.compiler }}_${{ matrix.dependencies }}_${{ matrix.build_type }}_dockerfile
           path: ${{ env.DOCKERFILE_OUT }} 

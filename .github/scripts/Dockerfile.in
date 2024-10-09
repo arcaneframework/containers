@@ -12,6 +12,9 @@ ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
 ENV OMPI_ALLOW_RUN_AS_ROOT=1
 ENV OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
 
+RUN /root/scripts/use_openmpi.sh
+RUN /root/scripts/use_@COMPILER_NAME@@COMPILER_VERSION_WITH_DASH@.sh
+
 RUN cd /tmp \
     && git clone --recurse-submodules https://github.com/arcaneframework/framework \
     && mkdir build \
@@ -22,7 +25,7 @@ RUN cd /tmp \
         -D BUILD_SHARED_LIBS=ON \
         -D CMAKE_C_COMPILER=@C_COMPILER@ \
         -D CMAKE_CXX_COMPILER=@CXX_COMPILER@ \
-        -D ARCCORE_CXX_STANDARD=23 \
+        -D ARCCORE_CXX_STANDARD=20 \
         -D ARCANE_DEFAULT_PARTITIONER=Metis \
         -D CMAKE_BUILD_TYPE=@CMAKE_BUILD_TYPE@ \
         -D ARCCORE_BUILD_MODE=@ARCCORE_BUILD_MODE@ \
@@ -30,7 +33,3 @@ RUN cd /tmp \
         @CMAKE_CONFIG@ \
     && cmake --build /tmp/build --target install \
     && cd / && rm -rf /tmp/*
-
-# RUN useradd -ms /bin/bash arcane_user
-# USER arcane_user
-# WORKDIR /home/arcane_user

@@ -2,12 +2,12 @@
 
 # -*- tab-width: 2; indent-tabs-mode: nil; coding: utf-8-without-signature -*-
 # -----------------------------------------------------------------------------
-# Copyright 2000-2022 CEA (www.cea.fr) IFPEN (www.ifpenergiesnouvelles.com)
+# Copyright 2000-2025 CEA (www.cea.fr) IFPEN (www.ifpenergiesnouvelles.com)
 # See the top-level COPYRIGHT file for details.
 # SPDX-License-Identifier: Apache-2.0
 # -----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------
-# DockerfileGenerator.sh                                          (C) 2000-2022
+# DockerfileGenerator.sh                                          (C) 2000-2025
 #
 # Script permettant de générer un Dockerfile décrivant une image Docker
 # avec Arcane d'installé.
@@ -257,6 +257,11 @@ then
 elif [ "${IMAGE_VERSION}" = 'full' ]
 then
   CMAKE_CONFIG+='-D PTScotch_INCLUDE_DIR="/usr/include/scotch" '
+  CMAKE_CONFIG+='-D CMAKE_DISABLE_FIND_PACKAGE_Trilinos=ON '
+  CMAKE_CONFIG+='-D ALIEN_BUILD_COMPONENT=all '
+  CMAKE_CONFIG+='-D ALIEN_PLUGIN_HYPRE=ON '
+  CMAKE_CONFIG+='-D ALIEN_PLUGIN_PETSC=ON '
+  CMAKE_CONFIG+='-D GFORTRAN_LIBRARY=/usr/lib/gcc/x86_64-linux-gnu/13/libgfortran.so '
 
 elif [ "${IMAGE_VERSION}" = 'minimal' ] || [ "${IMAGE_VERSION}" = 'doc' ]
 then

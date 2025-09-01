@@ -91,7 +91,7 @@ tag with a creation date).
 Here are the automatically regenerated images (you can change `latest`
 by a date, see [here](https://github.com/orgs/arcaneframework/packages?repo_name=framework-ci)) :
 - `arcane_ubuntu-2404:`
-  - `gcc-14`
+  - `gcc-14` / `clang_21`
     - `_full_release_latest`
     - `_full_check_latest`
     - `_full_debug_latest`
@@ -163,12 +163,12 @@ docker exec -it "$CONTAINER_ID" bash
 cd /tmp
 git clone https://github.com/arcaneframework/arcane-benchs
 mkdir build/
-cmake -S arcane-benchs/quicksilver/ -B build/ -GNinja
+cmake -S arcane-benchs/qama/ -B build/ -GNinja
 cmake --build build/
 
-./build/src/Quicksilver \
--A,ReferenceDirectory=./arcane-benchs/quicksilver/reference_files/ \
-./arcane-benchs/quicksilver/data/tests/ExampleFull.arc
+./build/src/QAMA \
+-A,ReferenceDirectory=./arcane-benchs/qama/reference_files/ \
+./arcane-benchs/qama/data/tests/ExampleFull.arc
 
 exit
 ```

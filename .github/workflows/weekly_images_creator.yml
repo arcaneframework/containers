@@ -37,7 +37,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Generate Dockerfile
         shell: 'bash'
@@ -67,8 +67,12 @@ jobs:
             org.opencontainers.image.description=Arcane Framework Image
             org.opencontainers.image.vendor=CEA
           tags: |
-            type=raw, ${{ matrix.compiler }}_${{ matrix.dependencies }}_${{ matrix.build_type }}_latest
-            type=raw, ${{ matrix.compiler }}_${{ matrix.dependencies }}_${{ matrix.build_type }}_{{date 'YYYYMMDD'}}
+            type=raw, ${{ matrix.dependencies }}_${{ matrix.build_type }}_latest
+            type=raw, ${{ matrix.dependencies }}_${{ matrix.build_type }}_{{date 'YYYYMMDD'}}
+            type=raw, gcc-14_${{ matrix.dependencies }}_${{ matrix.build_type }}_latest
+            type=raw, gcc-14_${{ matrix.dependencies }}_${{ matrix.build_type }}_{{date 'YYYYMMDD'}}
+            type=raw, clang-21_${{ matrix.dependencies }}_${{ matrix.build_type }}_latest
+            type=raw, clang-21_${{ matrix.dependencies }}_${{ matrix.build_type }}_{{date 'YYYYMMDD'}}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v6

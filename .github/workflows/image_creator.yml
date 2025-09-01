@@ -12,7 +12,6 @@ on:
         options:
         - 'ubuntu-2404'
         - 'ubuntu-2204'
-        - 'ubuntu-2004'
 
       compiler:
         description: 'Compiler'
@@ -23,14 +22,11 @@ on:
         - 'gcc-14'
         - 'gcc-12'
         - 'gcc-11'
-        - 'clang-18'
-        - 'clang-15'
-        - 'clang-14'
-        - 'clang-13'
-        - 'cuda-120'
-        - 'cuda-118'
-        - 'cuda-117'
-        - 'cuda-116'
+        - 'clang-21'
+        - 'clang-19'
+        - 'clang-16'
+        - 'cuda-130'
+        - 'cuda-126'
 
       dependencies:
         description: 'Dependencies'
@@ -73,7 +69,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Generate Dockerfile
         shell: 'bash'

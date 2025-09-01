@@ -21,6 +21,7 @@ RUN cd /tmp \
     && cmake \
         -S /tmp/framework \
         -B /tmp/build \
+        -D CMAKE_INSTALL_PREFIX=/usr/local \
         -G Ninja \
         -D BUILD_SHARED_LIBS=ON \
         -D CMAKE_C_COMPILER=@C_COMPILER@ \
@@ -32,4 +33,5 @@ RUN cd /tmp \
         -D ARCANE_BUILD_TYPE=@ARCANE_BUILD_TYPE@ \
         @CMAKE_CONFIG@ \
     && cmake --build /tmp/build --target install \
-    && cd / && rm -rf /tmp/*
+    && cd / \
+    && rm -rf /tmp/* /tmp/.dotnet

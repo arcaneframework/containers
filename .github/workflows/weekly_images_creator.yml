@@ -19,7 +19,7 @@ jobs:
       fail-fast: false
       matrix:
         os_base: ['ubuntu-2604']
-        compiler: ['gcc-15']
+        compiler: ['gcc-15', 'cuda-131']
         dependencies: ['full', 'minimal']
         build_type: ['release', 'debug', 'check']
 
@@ -28,6 +28,14 @@ jobs:
             compiler: 'gcc-15'
             dependencies: 'minimal'
             build_type: 'check'
+
+          - compiler: 'cuda-131'
+            dependencies: 'minimal'
+
+          - compiler: 'gcc-15'
+            dependencies: 'full'
+
+
 
     name: arcane_${{ matrix.os_base }}:${{ matrix.compiler }}_${{ matrix.dependencies }}_${{ matrix.build_type }}
     runs-on: ubuntu-latest
@@ -57,7 +65,8 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata (tags, labels) for Docker
+      - name: Extract metadata (tags, labels) for Docker (minimal)
+        if: "${{ matrix.build_type == 'minimal' }}"
         id: meta
         uses: docker/metadata-action@v6
         with:
@@ -69,10 +78,26 @@ jobs:
           tags: |
             type=raw, ${{ matrix.dependencies }}_${{ matrix.build_type }}_latest
             type=raw, ${{ matrix.dependencies }}_${{ matrix.build_type }}_{{date 'YYYYMMDD'}}
-            type=raw, gcc-14_${{ matrix.dependencies }}_${{ matrix.build_type }}_latest
-            type=raw, gcc-14_${{ matrix.dependencies }}_${{ matrix.build_type }}_{{date 'YYYYMMDD'}}
-            type=raw, clang-21_${{ matrix.dependencies }}_${{ matrix.build_type }}_latest
-            type=raw, clang-21_${{ matrix.dependencies }}_${{ matrix.build_type }}_{{date 'YYYYMMDD'}}
+            type=raw, gcc-15_${{ matrix.dependencies }}_${{ matrix.build_type }}_latest
+            type=raw, gcc-15_${{ matrix.dependencies }}_${{ matrix.build_type }}_{{date 'YYYYMMDD'}}
+
+      - name: Extract metadata (tags, labels) for Docker (full)
+        if: "${{ matrix.build_type == 'full' }}"
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.USER_NAME }}/arcane_${{ matrix.os_base }}
+          labels: |
+            org.opencontainers.image.title=ArcaneFramework
+            org.opencontainers.image.description=Arcane Framework Image
+            org.opencontainers.image.vendor=CEA
+          tags: |
+            type=raw, ${{ matrix.dependencies }}_${{ matrix.build_type }}_latest
+            type=raw, ${{ matrix.dependencies }}_${{ matrix.build_type }}_{{date 'YYYYMMDD'}}
+            type=raw, gcc-15_${{ matrix.dependencies }}_${{ matrix.build_type }}_latest
+            type=raw, gcc-15_${{ matrix.dependencies }}_${{ matrix.build_type }}_{{date 'YYYYMMDD'}}
+            type=raw, cuda-131_${{ matrix.dependencies }}_${{ matrix.build_type }}_latest
+            type=raw, cuda-131_${{ matrix.dependencies }}_${{ matrix.build_type }}_{{date 'YYYYMMDD'}}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v7

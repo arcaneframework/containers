@@ -261,7 +261,10 @@ then
   CMAKE_CONFIG+='-D ALIEN_BUILD_COMPONENT=all '
   CMAKE_CONFIG+='-D ALIEN_PLUGIN_HYPRE=ON '
   CMAKE_CONFIG+='-D ALIEN_PLUGIN_PETSC=ON '
-  CMAKE_CONFIG+='-D GFORTRAN_LIBRARY=/usr/lib/gcc/x86_64-linux-gnu/13/libgfortran.so '
+  if [ "${OS}" != "ubuntu-2604" ]
+  then
+    CMAKE_CONFIG+='-D GFORTRAN_LIBRARY=/usr/lib/gcc/x86_64-linux-gnu/13/libgfortran.so '
+  fi
 
 elif [ "${IMAGE_VERSION}" = 'minimal' ] || [ "${IMAGE_VERSION}" = 'doc' ]
 then

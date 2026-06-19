@@ -10,8 +10,8 @@ on:
         default: 'ubuntu-2404'
         type: choice
         options:
+        - 'ubuntu-2604'
         - 'ubuntu-2404'
-        - 'ubuntu-2204'
 
       compiler:
         description: 'Compiler'
@@ -19,14 +19,16 @@ on:
         default: 'gcc-14'
         type: choice
         options:
+        - 'gcc-15'
         - 'gcc-14'
         - 'gcc-12'
         - 'gcc-11'
+        - 'clang-22'
         - 'clang-21'
+        - 'clang-20'
         - 'clang-19'
-        - 'clang-16'
+        - 'cuda-131'
         - 'cuda-130'
-        - 'cuda-126'
 
       dependencies:
         description: 'Dependencies'
@@ -69,7 +71,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Generate Dockerfile
         shell: 'bash'
@@ -83,7 +85,7 @@ jobs:
           --dockerfile_out ${{ env.DOCKERFILE_OUT }} 
 
       - name: Log in to the Container registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         if: ${{ ! inputs.dockerfile_only }}
         with:
           registry: ${{ env.REGISTRY }}
@@ -92,7 +94,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         if: ${{ ! inputs.dockerfile_only }}
         with:
           images: ${{ env.REGISTRY }}/${{ env.USER_NAME }}/arcane_${{ inputs.os_base }}
@@ -105,7 +107,7 @@ jobs:
             type=raw, ${{ inputs.compiler }}_${{ inputs.dependencies }}_${{ inputs.build_type }}_{{date 'YYYYMMDD'}}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         if: ${{ ! inputs.dockerfile_only }}
         with:
           context: .
@@ -119,7 +121,7 @@ jobs:
         run: echo "::error::Base image unknown, see available images here https://github.com/arcaneframework/framework-ci#images-disponibles"
 
       - name: Upload Dockerfile generated
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: arcane_${{ inputs.os_base }}_${{ inputs.compiler }}_${{ inputs.dependencies }}_${{ inputs.build_type }}_dockerfile
           path: ${{ env.DOCKERFILE_OUT }} 

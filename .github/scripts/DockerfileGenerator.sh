@@ -2,19 +2,19 @@
 
 # -*- tab-width: 2; indent-tabs-mode: nil; coding: utf-8-without-signature -*-
 # -----------------------------------------------------------------------------
-# Copyright 2000-2025 CEA (www.cea.fr) IFPEN (www.ifpenergiesnouvelles.com)
+# Copyright 2000-2026 CEA (www.cea.fr) IFPEN (www.ifpenergiesnouvelles.com)
 # See the top-level COPYRIGHT file for details.
 # SPDX-License-Identifier: Apache-2.0
 # -----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------
-# DockerfileGenerator.sh                                          (C) 2000-2025
+# DockerfileGenerator.sh                                          (C) 2000-2026
 #
 # Script permettant de générer un Dockerfile décrivant une image Docker
 # avec Arcane d'installé.
 # -----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------
 
-# v1.3
+# v1.4
 
 # Valeurs par défaut.
 OS=''
@@ -206,7 +206,7 @@ elif [ "${COMPILER_NAME}" = 'cuda' ]
 then
   C_COMPILER='gcc'
   CXX_COMPILER='g++'
-  CMAKE_CONFIG+='-D ARCANE_ACCELERATOR_MODE=CUDANVCC -D CMAKE_CUDA_COMPILER=nvcc '
+  CMAKE_CONFIG+='-D ARCANE_ACCELERATOR_MODE=CUDA -D CMAKE_CUDA_COMPILER=nvcc '
 
 else
   echo "Unknown compiler: ${COMPILER_NAME}"
@@ -261,7 +261,10 @@ then
   CMAKE_CONFIG+='-D ALIEN_BUILD_COMPONENT=all '
   CMAKE_CONFIG+='-D ALIEN_PLUGIN_HYPRE=ON '
   CMAKE_CONFIG+='-D ALIEN_PLUGIN_PETSC=ON '
-  CMAKE_CONFIG+='-D GFORTRAN_LIBRARY=/usr/lib/gcc/x86_64-linux-gnu/13/libgfortran.so '
+  if [ "${OS}" != "ubuntu-2604" ]
+  then
+    CMAKE_CONFIG+='-D GFORTRAN_LIBRARY=/usr/lib/gcc/x86_64-linux-gnu/13/libgfortran.so '
+  fi
 
 elif [ "${IMAGE_VERSION}" = 'minimal' ] || [ "${IMAGE_VERSION}" = 'doc' ]
 then

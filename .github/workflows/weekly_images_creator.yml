@@ -86,7 +86,7 @@ jobs:
           path: ${{ env.DOCKERFILE_OUT }} 
           retention-days: 7
 
-  build-and-push-full:
+  build-and-push-full-gpu:
     strategy:
       fail-fast: false
       matrix:
@@ -135,10 +135,78 @@ jobs:
           tags: |
             type=raw, ${{ matrix.dependencies }}_${{ matrix.build_type }}_latest
             type=raw, ${{ matrix.dependencies }}_${{ matrix.build_type }}_{{date 'YYYYMMDD'}}
-            type=raw, gcc-15_${{ matrix.dependencies }}_${{ matrix.build_type }}_latest
-            type=raw, gcc-15_${{ matrix.dependencies }}_${{ matrix.build_type }}_{{date 'YYYYMMDD'}}
             type=raw, cuda-131_${{ matrix.dependencies }}_${{ matrix.build_type }}_latest
             type=raw, cuda-131_${{ matrix.dependencies }}_${{ matrix.build_type }}_{{date 'YYYYMMDD'}}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ${{ env.DOCKERFILE_OUT }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Error message
+        if: ${{ failure() }}
+        run: echo "::error::Base image unknown, see available images here https://github.com/arcaneframework/framework-ci#images-disponibles"
+
+      - name: Upload Dockerfile generated
+        uses: actions/upload-artifact@v7
+        with:
+          name: arcane_${{ matrix.os_base }}_${{ matrix.compiler }}_${{ matrix.dependencies }}_${{ matrix.build_type }}_dockerfile
+          path: ${{ env.DOCKERFILE_OUT }} 
+          retention-days: 7
+
+  build-and-push-full-nogpu:
+    strategy:
+      fail-fast: false
+      matrix:
+        os_base: ['ubuntu-2604']
+        compiler: ['gcc-15']
+        dependencies: ['full']
+        build_type: ['check']
+
+    name: arcane_${{ matrix.os_base }}:${{ matrix.compiler }}_${{ matrix.dependencies }}_${{ matrix.build_type }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Generate Dockerfile
+        shell: 'bash'
+        run: |
+          ./.github/scripts/DockerfileGenerator.sh \
+          --os ${{ matrix.os_base }} \
+          --compiler ${{ matrix.compiler }} \
+          --image_version ${{ matrix.dependencies }} \
+          --build_type ${{ matrix.build_type }} \
+          --dockerfile_in ${{ env.DOCKERFILE_IN }} \
+          --dockerfile_out ${{ env.DOCKERFILE_OUT }} 
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.USER_NAME }}/arcane_${{ matrix.os_base }}
+          labels: |
+            org.opencontainers.image.title=ArcaneFramework
+            org.opencontainers.image.description=Arcane Framework Image
+            org.opencontainers.image.vendor=CEA
+          tags: |
+            type=raw, gcc-15_${{ matrix.dependencies }}_${{ matrix.build_type }}_latest
+            type=raw, gcc-15_${{ matrix.dependencies }}_${{ matrix.build_type }}_{{date 'YYYYMMDD'}}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v7

@@ -133,8 +133,8 @@ jobs:
             org.opencontainers.image.description=Arcane Framework Image
             org.opencontainers.image.vendor=CEA
           tags: |
-            type=raw, ${{ matrix.dependencies }}_${{ matrix.build_type }}_latest
-            type=raw, ${{ matrix.dependencies }}_${{ matrix.build_type }}_{{date 'YYYYMMDD'}}
+            type=raw, cuda_${{ matrix.dependencies }}_${{ matrix.build_type }}_latest
+            type=raw, cuda_${{ matrix.dependencies }}_${{ matrix.build_type }}_{{date 'YYYYMMDD'}}
             type=raw, cuda-131_${{ matrix.dependencies }}_${{ matrix.build_type }}_latest
             type=raw, cuda-131_${{ matrix.dependencies }}_${{ matrix.build_type }}_{{date 'YYYYMMDD'}}
 
@@ -165,7 +165,7 @@ jobs:
         os_base: ['ubuntu-2604']
         compiler: ['gcc-15']
         dependencies: ['full']
-        build_type: ['check']
+        build_type: ['release', 'check']
 
     name: arcane_${{ matrix.os_base }}:${{ matrix.compiler }}_${{ matrix.dependencies }}_${{ matrix.build_type }}
     runs-on: ubuntu-latest
@@ -205,6 +205,8 @@ jobs:
             org.opencontainers.image.description=Arcane Framework Image
             org.opencontainers.image.vendor=CEA
           tags: |
+            type=raw, ${{ matrix.dependencies }}_${{ matrix.build_type }}_latest
+            type=raw, ${{ matrix.dependencies }}_${{ matrix.build_type }}_{{date 'YYYYMMDD'}}
             type=raw, gcc-15_${{ matrix.dependencies }}_${{ matrix.build_type }}_latest
             type=raw, gcc-15_${{ matrix.dependencies }}_${{ matrix.build_type }}_{{date 'YYYYMMDD'}}
 
